@@ -11,6 +11,7 @@
   "license": "MIT",
   "files": [
     "index.js",
+    "lib",
     "utils.js"
   ],
   "main": "index.js",
@@ -40,7 +41,10 @@
     "gulp-format-md": "*",
     "mocha": "^2.4.5"
   },
-  "keywords": [],
+  "keywords": [
+    "collection",
+    "vinyl"
+  ],
   "verb": {
     "layout": "default",
     "plugins": [
