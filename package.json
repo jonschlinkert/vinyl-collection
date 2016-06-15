@@ -1,12 +1,12 @@
 {
-  "name": "vinyl-collections",
-  "description": "Create collections for vinyl files.",
+  "name": "vinyl-collection",
+  "description": "Create a collection for vinyl files.",
   "version": "0.1.0",
-  "homepage": "https://github.com/jonschlinkert/vinyl-collections",
+  "homepage": "https://github.com/jonschlinkert/vinyl-collection",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
-  "repository": "jonschlinkert/vinyl-collections",
+  "repository": "jonschlinkert/vinyl-collection",
   "bugs": {
-    "url": "https://github.com/jonschlinkert/vinyl-collections/issues"
+    "url": "https://github.com/jonschlinkert/vinyl-collection/issues"
   },
   "license": "MIT",
   "files": [

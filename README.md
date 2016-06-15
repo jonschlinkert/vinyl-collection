@@ -1,19 +1,20 @@
-# vinyl-collections [![NPM version](https://img.shields.io/npm/v/vinyl-collections.svg?style=flat)](https://www.npmjs.com/package/vinyl-collections) [![NPM downloads](https://img.shields.io/npm/dm/vinyl-collections.svg?style=flat)](https://npmjs.org/package/vinyl-collections) [![Build Status](https://img.shields.io/travis/jonschlinkert/vinyl-collections.svg?style=flat)](https://travis-ci.org/jonschlinkert/vinyl-collections)
+# vinyl-collection [![NPM version](https://img.shields.io/npm/v/vinyl-collection.svg?style=flat)](https://www.npmjs.com/package/vinyl-collection) [![NPM downloads](https://img.shields.io/npm/dm/vinyl-collection.svg?style=flat)](https://npmjs.org/package/vinyl-collection) [![Build Status](https://img.shields.io/travis/jonschlinkert/vinyl-collection.svg?style=flat)](https://travis-ci.org/jonschlinkert/vinyl-collection)
 
-Create collections for vinyl files.
+Create a collection for vinyl files.
 
 ## Install
 
 Install with [npm](https://www.npmjs.com/):
 
 ```sh
-$ npm install --save vinyl-collections
+$ npm install --save vinyl-collection
 ```
 
 ## Usage
 
 ```js
-var collections = require('vinyl-collections');
+var Collection = require('vinyl-collection');
+var collection = new Collection();
 ```
 
 ## API
