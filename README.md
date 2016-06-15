@@ -14,12 +14,25 @@ $ npm install --save vinyl-collection
 
 ```js
 var Collection = require('vinyl-collection');
-var collection = new Collection();
 ```
 
 ## API
 
-### [.file](index.js#L50)
+### [Collection](index.js#L25)
+
+Create a new `Collection` with the given `options`.
+
+**Params**
+
+* `options` **{Object}**
+
+**Example**
+
+```js
+var collection = new Collection();
+```
+
+### [.file](index.js#L60)
 
 Create a vinyl `file`.
 
@@ -35,7 +48,7 @@ Create a vinyl `file`.
 var file = collection.file('foo', {path: 'a/b/c.js'});
 ```
 
-### [.addFile](index.js#L98)
+### [.addFile](index.js#L108)
 
 Add a `file` to the collection.
 
@@ -51,7 +64,7 @@ Add a `file` to the collection.
 collection.addFile('foo', {path: 'a/b/c.js'});
 ```
 
-### [.addFiles](index.js#L116)
+### [.addFiles](index.js#L126)
 
 Add an object or array of `files` to the collection.
 
@@ -66,7 +79,7 @@ Add an object or array of `files` to the collection.
 collection.addFiles(files);
 ```
 
-### [.getFile](index.js#L145)
+### [.getFile](index.js#L155)
 
 Get a file from the collection.
 
@@ -81,7 +94,7 @@ Get a file from the collection.
 var file = collection.getFile('foo');
 ```
 
-### [.isFile](index.js#L210)
+### [.isFile](index.js#L220)
 
 Returns true if `file` is a collection `file` object.
 
@@ -103,7 +116,7 @@ console.log(collection.isFile(collection.file({path: 'foo'})));
 //=> true
 ```
 
-### [.isFile](index.js#L232)
+### [.isFile](index.js#L242)
 
 Static method, returns true if `file` is a collection `file` object.
 

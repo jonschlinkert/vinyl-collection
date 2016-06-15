@@ -12,6 +12,16 @@ var debug = require('debug')('vinyl:collections');
 var utils = require('./lib/utils');
 var init = require('./lib/init');
 
+/**
+ * Create a new `Collection` with the given `options`.
+ *
+ * ```js
+ * var collection = new Collection();
+ * ```
+ * @param {Object} `options`
+ * @api public
+ */
+
 function Collection(options) {
   if (!(this instanceof Collection)) {
     return new Collection(options);
