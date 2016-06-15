@@ -9,7 +9,8 @@
 
 var Base = require('base');
 var debug = require('debug')('vinyl:collections');
-var utils = require('./utils');
+var utils = require('./lib/utils');
+var init = require('./lib/init');
 
 function Collection(options) {
   if (!(this instanceof Collection)) {
@@ -25,6 +26,7 @@ function Collection(options) {
   this.use(utils.plugin());
   this.use(utils.option());
   this.use(utils.data());
+  init(this);
 }
 
 /**
@@ -33,13 +35,17 @@ function Collection(options) {
 
 Base.extend(Collection);
 
-Collection.isFile = function(file) {
-  return utils.isObject(file) && (file.isFile || file._isVinyl);
-};
-
-Collection.prototype.isFile = function(file) {
-  return Collection.isFile(file) || this.File.isVinyl(file);
-};
+/**
+ * Create a vinyl `file`.
+ *
+ * ```js
+ * var file = collection.file('foo', {path: 'a/b/c.js'});
+ * ```
+ * @param {String|Object} `key` Optionally define a `key` to use if the file will be cached.
+ * @param {Object} `file` Object or instance of [vinyl][].
+ * @return {Object}
+ * @api public
+ */
 
 Collection.prototype.file = function(key, file) {
   if (utils.isObject(key)) {
@@ -48,10 +54,10 @@ Collection.prototype.file = function(key, file) {
   }
 
   if (typeof file === 'string') {
-    file = { contents: new Buffer(file) };
+    file = { contents: file };
   }
 
-  if (Buffer.isBuffer(file)) {
+  if (utils.isBuffer(file)) {
     file = { contents: file };
   }
 
@@ -77,6 +83,18 @@ Collection.prototype.file = function(key, file) {
   return file;
 };
 
+/**
+ * Add a `file` to the collection.
+ *
+ * ```js
+ * collection.addFile('foo', {path: 'a/b/c.js'});
+ * ```
+ * @param {String|Object} `key` Either the `key` to use for caching the file, or a [vinyl][] `file` object
+ * @param {Object} `file` Object or instance of `Vinyl`
+ * @return {Object} Returns the instance for chaining
+ * @api public
+ */
+
 Collection.prototype.addFile = function(key, file) {
   var file = this.file.apply(this, arguments);
   this.emit('file', file);
@@ -84,17 +102,86 @@ Collection.prototype.addFile = function(key, file) {
   return this;
 };
 
+/**
+ * Add an object or array of `files` to the collection.
+ *
+ * ```js
+ * collection.addFiles(files);
+ * ```
+ * @param {Array|Object} `files`
+ * @return {Object} Returns the instance for chaining
+ * @api public
+ */
+
 Collection.prototype.addFiles = function(files) {
-  if (Array.isArray(files)) {
-    return files.forEach(this.addFile.bind(this));
+  if (this.isFile(files)) {
+    return this.addFile.apply(this, arguments);
   }
-  for (var key in files) this.addFile(key, files[key]);
+
+  if (Array.isArray(files)) {
+    files.forEach(function(file) {
+      this.addFile(file);
+    }.bind(this));
+    return;
+  }
+
+  for (var key in files) {
+    this.addFile(key, files[key]);
+  }
   return this;
 };
 
+/**
+ * Get a file from the collection.
+ *
+ * ```js
+ * var file = collection.getFile('foo');
+ * ```
+ * @param {String|Object} `key` The key of the file to get. If `key` is a `file` object it is returned.
+ * @return {Object} Returns the `file` if found
+ * @api public
+ */
+
 Collection.prototype.getFile = function(key) {
-  return this.isFile(key) ? key : (this.files[key] || this.files[this.renameKey(key)]);
+  if (!this.isFile(key)) {
+    var file = this.files[key] || this.files[this.renameKey(key)];
+    if (typeof file === 'undefined') {
+      for (var prop in this.files) {
+        if (this.files.hasOwnProperty(prop)) {
+          var val = this.files[prop];
+          if (val.path === key) {
+            return val;
+          }
+          if (val.relative === key) {
+            return val;
+          }
+          if (val.basename === key) {
+            return val;
+          }
+          if (val.stem === key) {
+            return val;
+          }
+        }
+      }
+    }
+    return file;
+  }
+  return key;
 };
+
+/**
+ * Rename the `key` on the given file. If `options.renameKey` is a function,
+ * it will be used to rename the key, otherwise, the key is not modified.
+ * This is used to ensure that file keys are consistently named using user-defined
+ * preferences.
+ *
+ * ```js
+ * collection.renameKey('foo');
+ * ```
+ * @param {String} `key`
+ * @param {Object} `file`
+ * @return {Boolean}
+ */
 
 Collection.prototype.renameKey = function(key, file) {
   return typeof this.options.renameKey === 'function'
@@ -102,28 +189,48 @@ Collection.prototype.renameKey = function(key, file) {
     : key;
 };
 
-Collection.prototype.engine = function(ext, fn) {
-  this.engines[utils.formatExt(ext)] = fn;
-  return this;
+/**
+ * Returns true if `file` is a collection `file` object.
+ *
+ * ```js
+ * console.log(collection.isFile('foo'));
+ * //=> false
+ *
+ * console.log(collection.isFile(new Vinyl({path: 'foo'})));
+ * //=> false
+ *
+ * console.log(collection.isFile(collection.file({path: 'foo'})));
+ * //=> true
+ * ```
+ * @param {Object} `file`
+ * @return {Boolean}
+ * @api public
+ */
+
+Collection.prototype.isFile = function(file) {
+  return Collection.isFile(file);
 };
 
-Collection.prototype.render = function(file, locals, cb) {
-  if (typeof locals === 'function') {
-    cb = locals;
-    locals = {};
-  }
+/**
+ * Static method, returns true if `file` is a collection `file` object.
+ *
+ * ```js
+ * console.log(Collection.isFile('foo'));
+ * //=> false
+ *
+ * console.log(Collection.isFile(new Vinyl({path: 'foo'})));
+ * //=> false
+ *
+ * console.log(Collection.isFile(collection.file({path: 'foo'})));
+ * //=> true
+ * ```
+ * @param {Object} `file`
+ * @return {Boolean}
+ * @api public
+ */
 
-  file = this.getFile(file);
-  var ext = file.extname;
-  var engine = this.engines[file.extname] || this.engines.noop;
-
-  if (typeof engine === 'undefined') {
-    cb(new Error('cannot find an engine for: ' + ext));
-    return;
-  }
-
-  var ctx = utils.extend({}, this.cache.data, locals);
-  engine.render(file.contents.toString(), ctx, cb);
+Collection.isFile = function(file) {
+  return utils.isObject(file) && file.isFile;
 };
 
 /**
